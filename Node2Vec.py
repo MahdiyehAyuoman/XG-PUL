@@ -1,27 +1,29 @@
+from config import *
 import networkx as nx
 from node2vec import Node2Vec
 import pandas as pd
 import time
-import multiprocessing
+
+
 
 # ==============================================================================
 # SETUP SELECTION - UNCOMMENT ONLY ONE LINE
 # ==============================================================================
-# SETUP = 'baseline'        # Setup 1: Current settings (already executed)
-# SETUP = 'highdim'         # Setup 2: Higher dimensions for more information
-# SETUP = 'deepexplore'     # Setup 3: Deeper exploration of the network
-SETUP = 'ultrahighdim'    # Setup 4: Ultra high dimensions (500) for maximum separation
+# SETUP = 'Baseline'       
+SETUP = 'HighDim'         
+# SETUP = 'DeepExplore'    
+# SETUP = 'UltraHighDim'    
 
 # ==============================================================================
 # HYPERPARAMETER SETTINGS
 # File paths and parameters are set based on the selected SETUP
 # ==============================================================================
 
-INPUT_EDGELIST_FILE  = r"C:\Users\Asus\Desktop\check_gene_overlap NetEM&XGDAG\Invalid data\XGDAG_PPI.txt"
+INPUT_NETWORK_FILE = PATH_TO_DATASETS + "PPI.txt"
 
 # Configure output file name and parameters based on selected SETUP
-if SETUP == 'baseline':
-    OUTPUT_EMBEDDINGS_FILE = r"C:\Users\Asus\Desktop\check_gene_overlap NetEM&XGDAG\XGDAG_All Seed Genes\XGDAG_PPI_node2vec_embeddings_baseline.csv"
+if SETUP == 'Baseline':
+    OUTPUT_EMBEDDINGS_FILE =  PATH_TO_DATASETS + "node2vec_embeddings_Baseline.csv"
     HYPERPARAMETERS = {
         "dimensions": 128,
         "walk_length": 80,
@@ -31,8 +33,8 @@ if SETUP == 'baseline':
         "p": 1,
         "q": 1
     }
-elif SETUP == 'highdim':
-    OUTPUT_EMBEDDINGS_FILE = r"C:\Users\Asus\Desktop\check_gene_overlap NetEM&XGDAG\XGDAG_All Seed Genes\XGDAG_PPI_node2vec_embeddings_highdim.csv"
+elif SETUP == 'HighDim':
+    OUTPUT_EMBEDDINGS_FILE = PATH_TO_DATASETS + "node2vec_embeddings_HighDim.csv"
     HYPERPARAMETERS = {
         "dimensions": 256,      # Higher dimensions: 128 → 256
         "walk_length": 80,
@@ -42,8 +44,8 @@ elif SETUP == 'highdim':
         "p": 1,
         "q": 1
     }
-elif SETUP == 'deepexplore':
-    OUTPUT_EMBEDDINGS_FILE = r"C:\Users\Asus\Desktop\check_gene_overlap NetEM&XGDAG\XGDAG_All Seed Genes\XGDAG_PPI_node2vec_embeddings_deepexplore.csv"
+elif SETUP == 'DeepExplore':
+    OUTPUT_EMBEDDINGS_FILE = PATH_TO_DATASETS + "node2vec_embeddings_DeepExplore.csv"
     HYPERPARAMETERS = {
         "dimensions": 128,
         "walk_length": 80,
@@ -53,8 +55,8 @@ elif SETUP == 'deepexplore':
         "p": 0.5,               # More exploration: decreased p
         "q": 2                  # Long-distance exploration: increased q
     }
-elif SETUP == 'ultrahighdim':
-    OUTPUT_EMBEDDINGS_FILE = r"C:\Users\Asus\Desktop\check_gene_overlap NetEM&XGDAG\XGDAG_All Seed Genes\XGDAG_PPI_node2vec_embeddings_ultrahighdim.csv"
+elif SETUP == 'UltraHighDim':
+    OUTPUT_EMBEDDINGS_FILE = PATH_TO_DATASETS + "node2vec_embeddings_UltraHighDim.csv"
     HYPERPARAMETERS = {
         "dimensions": 500,      # Ultra high dimensions: 256 → 500
         "walk_length": 80,
@@ -65,7 +67,7 @@ elif SETUP == 'ultrahighdim':
         "q": 1
     }
 else:
-    raise ValueError(f"Invalid SETUP: {SETUP}. Only 'baseline', 'highdim', 'deepexplore', or 'ultrahighdim' are allowed.")
+    raise ValueError(f"Invalid SETUP: {SETUP}. Only 'Baseline', 'HighDim', 'DeepExplore', or 'UltraHighDim' are allowed.")
 
 # Word2Vec Model Hyperparameters (used internally by Node2Vec)
 FIT_PARAMETERS = {
@@ -94,14 +96,14 @@ def main():
     # Assumes the file is tab-separated and has no comments.
     try:
         graph = nx.read_edgelist(
-            INPUT_EDGELIST_FILE,
+            INPUT_NETWORK_FILE,
             nodetype=str,
             create_using=nx.Graph()
         )
         # Ensure the graph is undirected
         graph = graph.to_undirected()
     except FileNotFoundError:
-        print(f"Error: File '{INPUT_EDGELIST_FILE}' not found. Please ensure the filename and path are correct.")
+        print(f"Error: File '{INPUT_NETWORK_FILE}' not found. Please ensure the filename and path are correct.")
         return
 
     print(f"Graph loaded successfully with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges.")
@@ -121,7 +123,6 @@ def main():
         quiet=False # Set to False to show progress bar
     )
     print("Model initialized successfully.")
-    print(f"Hyperparameters: {HYPERPARAMETERS}")
     print("-" * 30)
 
     print("Step 3: Training the model to generate embeddings...")
