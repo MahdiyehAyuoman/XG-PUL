@@ -1,3 +1,4 @@
+from config import PATH_TO_DATASETS, PATH_TO_RANKINGS
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -8,20 +9,14 @@ from pulearn import BaggingPuClassifier # Using BaggingPU for robustness
 
 warnings.filterwarnings('ignore')
 
+
 # ==============================================================================
 # CONFIGURATION
 # ==============================================================================
 
-BASE_DIR = r"C:\Users\Asus\Desktop\XG-PUL"
-EMBEDDINGS_DIR = os.path.join(BASE_DIR, "data")
-FEATURES_DIR = os.path.join(BASE_DIR, "data") 
-ALL_SEEDS_DIR = os.path.join(BASE_DIR, "data")
-TRAIN_SEEDS_DIR = os.path.join(BASE_DIR, "data")
-
-
 EMBEDDING_SETUPS = {
-    'highdim': {
-        'file': os.path.join(EMBEDDINGS_DIR, 'PPI_node2vec_embeddings_highdim.csv'),
+    'HighDim': {
+        'file': os.path.join(PATH_TO_DATASETS, 'node2vec_embeddings_HighDim.csv'),
         'description': 'High Dimension'
     }
 }
@@ -52,15 +47,18 @@ def read_gene_list(path, error_msg):
 # Find Disease Module Function: PU LEARNING AND RANKING FUNCTION
 # ==============================================================================
 
-def FindDiseaseModule():
+def find_disease_module():
     """
     Trains a PU Learning model with feature selection and generates a ranked
     list of non-seed genes for comparison.
     """
-    setup_name = 'highdim'
+    setup_name = 'HighDim'
     setup_config = EMBEDDING_SETUPS[setup_name]
     
-    output_ranking_dir = os.path.join(BASE_DIR, "Ranking_result", "FindDiseaseModule_TopologicalFeatures_EmbedddingHighdim")
+    output_ranking_dir = os.path.join(
+    PATH_TO_RANKINGS,
+    "FindDiseaseModule_TopologicalFeatures_EmbeddingHighDim"
+)
     os.makedirs(output_ranking_dir, exist_ok=True)
 
     print("="*80)
@@ -71,7 +69,7 @@ def FindDiseaseModule():
     if embeddings_df is None: return
 
     # # 1. read CLEAN Topological Features
-    feature_path = os.path.join(FEATURES_DIR, "topological_features.csv")
+    feature_path = os.path.join(PATH_TO_DATASETS, "topological_features.csv")
     features_df = read_data(feature_path, 'gene', "Topological features file")
     if features_df is None: return
 
@@ -83,8 +81,8 @@ def FindDiseaseModule():
         print(f"\n-- Processing Disease: {disease_code} --")
 
         # 3. read Gene Sets for Hold-Out
-        train_genes_path = os.path.join(TRAIN_SEEDS_DIR, f"{disease_code}_seed_genes.txt")
-        all_genes_path = os.path.join(ALL_SEEDS_DIR, f"{disease_code}_all_seed_genes.txt")
+        train_genes_path = os.path.join(PATH_TO_DATASETS, f"{disease_code}_seed_genes.txt")
+        all_genes_path = os.path.join(PATH_TO_DATASETS, f"{disease_code}_all_seed_genes.txt")
         
         train_pos_genes = read_gene_list(train_genes_path, "Training seed file")
         all_pos_genes = read_gene_list(all_genes_path, "All seed file")
@@ -150,7 +148,7 @@ def FindDiseaseModule():
         }).sort_values('score', ascending=False)
 
         # 9. Save Ranking File
-        output_filename = f"{disease_code}_ranking_TopologicalFeatures_EmbedddingHighdim.txt"
+        output_filename = f"{disease_code}_ranking_TopologicalFeatures_EmbeddingHighDim.txt"
         output_path = os.path.join(output_ranking_dir, output_filename)
         
         ranking_df['gene'].to_csv(output_path, index=False, header=False)
@@ -159,8 +157,5 @@ def FindDiseaseModule():
 # ==============================================================================
 # SCRIPT EXECUTION
 # ==============================================================================
-
 if __name__ == "__main__":
-    FindDiseaseModule()
-
-    # FindDiseaseModule_TopologicalFeatures_EmbedddingHighdim
+    find_disease_module()
