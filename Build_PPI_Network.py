@@ -5,11 +5,10 @@ import os
 
 
 # --- Configuration ---
-BIOGRID_FILENAME = "BIOGRID-ALL-4.4.206.tab3.txt"
-BIOGRID_FILE = PATH_TO_RAW_DATA + BIOGRID_FILENAME
-OUTPUT_NETWORK = PATH_TO_PROCESSED_DATA + "BioGRID_HomoSapiens_LCC.txt"
 
+BIOGRID_FILE = PATH_TO_DATASETS + "BIOGRID-ALL-4.4.206.tab3.txt"
 
+OUTPUT_NETWORK = PATH_TO_DATASETS + "PPI.txt"
 
 
 # --- Step 1: Read and Filter Data ---
@@ -77,7 +76,6 @@ def create_ppi_network():
     print("\nFinal Graph (LCC) stats:")
     print(f"  - Number of nodes (genes): {G_lcc.number_of_nodes()}")
     print(f"  - Number of edges (interactions): {G_lcc.number_of_edges()}")
-    print("(These numbers should be close to the paper's ~19k nodes and ~678k edges)")
 
     # --- Step 5: Save the Final Network ---
     print(f"\nSaving the final network to: {OUTPUT_NETWORK}")
